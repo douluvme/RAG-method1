@@ -147,10 +147,27 @@ Each step ends with something you can try.
 
 ---
 
-## 9. Remaining open questions
+## 9. Follow-up answers (resolved)
 
-1. **Do you already have an OpenAI API account?** If not, setting one up is part of milestone 0.
-2. **Roughly how many questions per day?** This gives a realistic monthly cost estimate.
-3. **Are any documents confidential**, e.g. medical, legal, or employer-owned? This affects whether OpenAI is acceptable.
-4. **Is DOCX section/paragraph citation okay**, or do you need true page numbers (which means installing LibreOffice)?
-5. **Do you have sample documents** we can use for the test set in milestone 6?
+| Question | Answer | Effect on the plan |
+|---|---|---|
+| OpenAI API account? | You already have a key | Milestone 0 only needs you to paste the key into `.env` |
+| Questions per day? | About 10 (≈ 300 per month) | See the cost estimate below |
+| Confidential documents? | No | Sending documents to OpenAI is fine. No extra privacy measures needed. |
+| DOCX citations by section/paragraph? | Yes, that's fine | No LibreOffice needed. Word sources show as `file.docx — "Heading", ¶N` |
+| Sample documents for testing? | Yes, you have some | You'll share them at milestone 6 (or earlier, to test along the way). Include at least one scanned file and one non-English file. |
+
+### Estimated monthly cost (10 questions/day)
+
+Per-question cost depends mostly on how many pages are loaded. Most of the cost is the AI re-reading the documents. OpenAI gives about a **90% discount on cached input**. The cache lasts minutes to about an hour, so the first question in a session pays full price and quick follow-ups are cheap.
+
+Rough figures with a **full library of about 300 pages (about 150k tokens)**, based on published per-token prices as of October 2026:
+
+| Mode | First question of a session | Follow-up question | Approx. per month |
+|---|---|---|---|
+| Economy (small GPT model) | ~$0.03 | under $0.01 | **about $1–10** |
+| Best quality (flagship GPT model) | ~$0.30–1.50 | ~$0.03–0.20 | **about $20–150** |
+
+With fewer pages loaded, costs shrink proportionally. Image transcription for scanned pages is a one-time cost at upload, roughly a cent or less per page. The app will show a live estimate before each question. Prices and model names live in one settings file and are easy to update when OpenAI changes them.
+
+**Suggestion:** use Economy by default and switch to Best quality for hard or important questions. Also set a monthly spending limit in your OpenAI account settings as a safety net.
