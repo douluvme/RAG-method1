@@ -171,3 +171,20 @@ Rough figures with a **full library of about 300 pages (about 150k tokens)**, ba
 With fewer pages loaded, costs shrink proportionally. Image transcription for scanned pages is a one-time cost at upload, roughly a cent or less per page. The app will show a live estimate before each question. Prices and model names live in one settings file and are easy to update when OpenAI changes them.
 
 **Suggestion:** use Economy by default and switch to Best quality for hard or important questions. Also set a monthly spending limit in your OpenAI account settings as a safety net.
+
+---
+
+## 10. Build status
+
+| # | Milestone | Status |
+|---|---|---|
+| 0 | Setup | ✅ Done. See README for setup steps. |
+| 1 | Upload & library | ✅ Done |
+| 2 | Ask questions | ✅ Done |
+| 3 | Sources (verified quotes, page preview with highlight) | ✅ Done |
+| 4 | Scanned documents (AI vision) | ✅ Done |
+| 5 | Saved chats, Economy/Best switch, context meter, cost estimate | ✅ Done |
+| 6 | Quality check with your sample documents | ⏳ Next. Needs your files and a real API key. |
+| 7 | Ready for online (password gate built; hosting guide in README) | 🟡 Partly done |
+
+So far the app has been tested with automated tests and with a stand-in for OpenAI (the build environment can't reach OpenAI). The first run with your real key is the real test.

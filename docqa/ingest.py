@@ -9,7 +9,7 @@ from pathlib import Path
 
 from . import config
 from .db import Store
-from .extract import SUPPORTED_EXT, ExtractionError, OcrFn, ProgressFn, Section, extract
+from .extract import IMAGE_EXT, SUPPORTED_EXT, ExtractionError, OcrFn, ProgressFn, Section, extract
 from .tokens import count_tokens
 
 SECTION_OVERHEAD_TOKENS = 20  # the <section id=... location=...> markup
@@ -31,7 +31,7 @@ def _safe_filename(name: str) -> str:
 
 def _unit(path: Path) -> str:
     ext = path.suffix.lower()
-    return {".pdf": "page", ".docx": "section"}.get(ext, "image" if ext in {".png", ".jpg", ".jpeg", ".webp", ".gif"} else "block")
+    return {".pdf": "page", ".docx": "section"}.get(ext, "image" if ext in IMAGE_EXT else "block")
 
 
 def document_tokens(sections: list[Section]) -> int:

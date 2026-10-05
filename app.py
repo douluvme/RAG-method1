@@ -12,7 +12,7 @@ import streamlit as st
 
 from docqa import config
 from docqa.db import Store
-from docqa.extract import ExtractionError, render_pdf_page_with_highlight
+from docqa.extract import IMAGE_EXT, ExtractionError, render_pdf_page_with_highlight
 from docqa.ingest import ingest
 from docqa.qa import QAError, QAService, Result, Source, estimate_cost
 from docqa.verify import best_part
@@ -63,6 +63,13 @@ ss.toasts = []
 
 # ---------- upload ----------
 
+def size_label(name: str, n: int) -> str:
+    unit = {".pdf": "page", ".docx": "section"}.get(Path(name).suffix.lower())
+    if unit is None:
+        return "image" if Path(name).suffix.lower() in IMAGE_EXT else f"{n} text block{'s' * (n != 1)}"
+    return f"{n} {unit}{'s' * (n != 1)}"
+
+
 def handle_uploads(files) -> None:
     log = []
     for f in files:
@@ -84,8 +91,7 @@ def handle_uploads(files) -> None:
                 status.update(label=f"❌ {f.name}: could not be added", state="error")
                 log.append((False, f"**{f.name}** could not be added (unexpected error: {e})."))
                 continue
-            unit = r.unit + ("s" if r.n_sections != 1 and r.unit != "image" else "")
-            size = "" if r.unit == "image" else f" ({r.n_sections} {unit})"
+            size = "" if r.unit == "image" else f" ({size_label(f.name, r.n_sections)})"
             scanned = f", {r.n_scanned} read from scans" if r.n_scanned and r.unit == "page" else ""
             msg = f"✅ **{f.name}** is ready{size}{scanned}."
             status.update(label=msg.replace("**", ""), state="complete")
@@ -127,11 +133,11 @@ with st.sidebar:
     if not docs:
         st.info("No documents yet. Upload some to get started.")
     for d in docs:
-        c1, c2 = st.columns([5, 1])
+        c1, c2 = st.columns([4, 1], vertical_alignment="center")
         badge = " · 📷 scanned" if d.has_ocr else ""
-        c1.markdown(f"**{d.name}**  \n<small>{d.n_sections} part(s) · {d.n_tokens:,} tokens{badge}</small>",
+        c1.markdown(f"**{d.name}**  \n<small>{size_label(d.name, d.n_sections)} · {d.n_tokens:,} tokens{badge}</small>",
                     unsafe_allow_html=True)
-        if c2.button("🗑", key=f"del_doc_{d.id}", help=f"Delete {d.name}"):
+        if c2.button("", icon=":material/delete:", key=f"del_doc_{d.id}", help=f"Delete {d.name}"):
             store.delete_document(d.id)
             ss.upload_log = []
             ss.toasts.append(f"Deleted {d.name}")
@@ -152,16 +158,16 @@ with st.sidebar:
 
     st.divider()
     st.header("💬 Chats")
-    if st.button("➕ New chat", use_container_width=True):
+    if st.button("➕ New chat", width="stretch"):
         ss.chat_id = None
         st.rerun()
     for cid, title in store.list_chats():
-        c1, c2 = st.columns([5, 1])
+        c1, c2 = st.columns([4, 1], vertical_alignment="center")
         label = ("▶ " if cid == ss.chat_id else "") + title
-        if c1.button(label, key=f"chat_{cid}", use_container_width=True):
+        if c1.button(label, key=f"chat_{cid}", width="stretch"):
             ss.chat_id = cid
             st.rerun()
-        if c2.button("🗑", key=f"del_chat_{cid}", help="Delete this chat"):
+        if c2.button("", icon=":material/delete:", key=f"del_chat_{cid}", help="Delete this chat"):
             store.delete_chat(cid)
             if ss.chat_id == cid:
                 ss.chat_id = None
@@ -191,12 +197,12 @@ def render_source(src: Source, msg_id: int) -> None:
             if st.toggle("Show page", key=f"page_{msg_id}_{src.number}"):
                 try:
                     png = render_pdf_page_with_highlight(path, src.page_no, src.quote)
-                    st.image(png, caption=f"{src.doc_name}, page {src.page_no}")
+                    st.image(png, caption=f"{src.doc_name}, page {src.page_no}", width=560)
                 except Exception as e:
                     st.caption(f"Page preview unavailable ({e}).")
-        elif path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif"}:
+        elif path.suffix.lower() in IMAGE_EXT:
             if st.toggle("Show image", key=f"img_{msg_id}_{src.number}"):
-                st.image(str(path))
+                st.image(str(path), width=560)
         else:
             secs = store.sections(src.doc_id)
             if 0 <= src.section_idx < len(secs):
@@ -260,6 +266,7 @@ if question:
                 history.append((pending_q, m.content))
             pending_q = None
 
+    ss.upload_log = []
     store.add_message(ss.chat_id, "user", question)
     with st.chat_message("user"):
         st.markdown(question)
